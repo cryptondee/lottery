@@ -17,11 +17,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 error Raffle__NotEnoughEth();
 error Raffle__TransferFailed();
 error Raffle__NotOpen();
-error Raffle__UpkeepNotNeeded(
-    uint256 currentBalance,
-    uint256 numPlayers,
-    uint256 raffleState
-);
+error Raffle__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint256 raffleState);
 
 /** @title a sample raffle contract
  *   @author NDW
@@ -58,7 +54,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     /* events */
 
-    event RaffelEnter(address indexed player);
+    event RaffleEnter(address indexed player);
     event RequestedRaffleWinner(uint256 requestId);
     event WinnerPicked(address indexed winner);
 
@@ -91,7 +87,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         s_players.push(payable(msg.sender));
         // Events
         //named events with the function name reversed
-        emit RaffelEnter(msg.sender);
+        emit RaffleEnter(msg.sender);
     }
 
     /**
@@ -127,11 +123,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         // VRF is a 2 tx process
         (bool upkeepNeeded, ) = checkUpkeep("");
         if (!upkeepNeeded) {
-            revert Raffle__UpkeepNotNeeded(
-                address(this).balance,
-                s_players.length,
-                uint256(s_raffleState)
-            );
+            revert Raffle__UpkeepNotNeeded(address(this).balance, s_players.length, uint256(s_raffleState));
         }
         s_raffleState = RaffleState.CALCULATING;
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
@@ -196,5 +188,9 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     function getRequestConfirmation() public pure returns (uint256) {
         return REQUEST_CONFIRMATIONS;
+    }
+
+    function getInterval() public view returns (uint256) {
+        return i_interval;
     }
 }
